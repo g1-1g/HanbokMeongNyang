@@ -73,14 +73,11 @@ keyword_options = {
         "여자 한복 (여아)": "female"
     },
     "한복 스타일": {
-        "왕족 👑": "royal Korean king/queen hanbok with elaborate gold patterns and jade accessories",
         "세자/공주 ✨": "Korean prince/princess hanbok with elegant silk and jeweled ornaments",
-        "양반 🎋": "noble scholar yangban hanbok with refined patterns and traditional hat",
+        "왕족 👑": "royal Korean king/queen hanbok with elaborate gold patterns and jade accessories",
         "신랑신부 💒": "traditional Korean wedding hanbok with vibrant colors and ceremonial decorations",
-        "궁녀 🌸": "palace court lady hanbok with simple elegant design and traditional hairpin",
         "무관 ⚔️": "Korean military officer hanbok with armor-inspired details",
-        "기생 🎭": "Korean courtesan gisaeng hanbok with artistic patterns and accessories",
-        "평민 🌾": "common people hanbok with simple cotton fabric and minimal decoration"
+        "돌쇠 🪵": "traditional Korean servant (dolssoe) hanbok with simple cotton fabric, rolled sleeves, waist belt, straw shoes, and rustic countryside vibe"
     },
     "색상 조합": {
         "홍청 (빨강+파랑) 🔴🔵": "red and blue traditional colors",
