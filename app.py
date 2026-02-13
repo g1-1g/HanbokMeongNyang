@@ -96,16 +96,19 @@ keyword_options = {
         "무관 ⚔️": "Korean military officer hanbok with armor-inspired details",
         "돌쇠 🪵": "traditional Korean servant (dolssoe) hanbok with simple cotton fabric, rolled sleeves, waist belt, straw shoes, and rustic countryside vibe"
     },
-    "색상 조합": {
-        "흰색+금색 🤍✨": "white and gold elegant colors",
-        "하늘+연분홍 ☁️🌸": "sky blue and light pink soft colors",
-        "홍청 (빨강+파랑) 🔴🔵": "red and blue traditional colors",
-        "분홍+연두 🌸💚": "pink and light green soft colors",
-        "보라+노랑 💜💛": "purple and yellow royal colors",
-        "검정+금색 🖤✨": "black and gold sophisticated colors",
-        "연두+살구 💚🍑": "light green and apricot spring colors",
-
-    },
+    "색상 선택 (여러 색상 조합 가능)": {
+    "흰색 🤍": "white",
+    "금색 ✨": "gold",
+    "하늘색 ☁️": "sky blue",
+    "연분홍 🌸": "light pink",
+    "빨강 🔴": "red",
+    "파랑 🔵": "blue",
+    "연두 💚": "light green",
+    "보라 💜": "purple",
+    "노랑 💛": "yellow",
+    "검정 🖤": "black",
+    "살구 🍑": "apricot"
+},
 }
 
 # 좌우 2컬럼 레이아웃
@@ -118,13 +121,19 @@ with left_col:
     selected_keywords = {}
 
     for category, options in keyword_options.items():
-        selected_keywords[category] = st.radio(
-            category,
-            options=list(options.keys()),
-            horizontal=True,
-            key=category
-        )
-
+        if category == "색상 선택 (여러 색상 조합 가능)":
+            selected_keywords[category] = st.multiselect(
+                category,
+                options=list(options.keys()),
+                key=category
+            )
+        else:
+            selected_keywords[category] = st.radio(
+                category,
+                options=list(options.keys()),
+                horizontal=True,
+                key=category
+            )
     st.markdown("---")
 
     # 추가 요청사항
@@ -149,7 +158,13 @@ with left_col:
                         animal_type = keyword_options["동물 종류"][selected_keywords["동물 종류"]]
                         gender = keyword_options["성별"][selected_keywords["성별"]]
                         hanbok_style = keyword_options["한복 스타일"][selected_keywords["한복 스타일"]]
-                        color_scheme = keyword_options["색상 조합"][selected_keywords["색상 조합"]]
+                        selected_colors = selected_keywords["색상 선택"]
+
+                        if selected_colors:
+                            color_list = [keyword_options["색상 선택"][c] for c in selected_colors]
+                            color_scheme = ", ".join(color_list)
+                        else:
+                            color_scheme = "soft pastel colors"
 
                         prompt = f"""
     Carefully edit this photo.
