@@ -8,7 +8,7 @@ import requests
 # 페이지 설정
 st.set_page_config(
     page_title="반려동물 한복 입히기",
-    page_icon="👘",
+    page_icon="🐕🐱",
     layout="wide"
 )
 
@@ -28,11 +28,29 @@ st.markdown("""
         font-size: 1.2em;
         margin-bottom: 30px;
     }
-    .keyword-section {
-        background-color: #FFF8DC;
-        padding: 20px;
-        border-radius: 10px;
-        margin: 10px 0;
+    /* 라디오 버튼 가로 정렬 */
+    div[role="radiogroup"] {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    div[role="radiogroup"] label {
+        background-color: #ffffff;
+        border: 3px solid #DDD;
+        border-radius: 20px;
+        padding: 6px 16px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    div[role="radiogroup"] label:hover {
+        background-color: #ffffff;
+        border-color: #fe786b;
+    }
+    div[role="radiogroup"] label[data-checked="true"],
+    div[role="radiogroup"] label:has(input:checked) {
+        background-color: #ffffff;
+        color: white;
+        border-color: #fe786b;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -91,65 +109,46 @@ keyword_options = {
     }
 }
 
-# 메인 컨텐츠
-col1, col2 = st.columns([1, 1])
+# 사진 업로드
+st.subheader("📸 반려동물 사진 (필수)")
+uploaded_file = st.file_uploader(
+    "한복을 입힐 반려동물 사진을 업로드하세요",
+    type=['png', 'jpg', 'jpeg'],
+    help="원본 사진에 한복을 합성합니다"
+)
+if uploaded_file:
+    image = Image.open(uploaded_file)
 
-with col1:
-    st.markdown('<div class="keyword-section">', unsafe_allow_html=True)
-    st.subheader("📸 반려동물 사진 (필수)")
-    uploaded_file = st.file_uploader(
-        "한복을 입힐 반려동물 사진을 업로드하세요",
-        type=['png', 'jpg', 'jpeg'],
-        help="원본 사진에 한복을 합성합니다"
+st.markdown("---")
+
+# 키워드 선택 (라디오 버튼)
+st.subheader("🎨 한복 스타일 선택")
+
+selected_keywords = {}
+
+for category, options in keyword_options.items():
+    selected_keywords[category] = st.radio(
+        category,
+        options=list(options.keys()),
+        horizontal=True,
+        key=category
     )
 
-    if uploaded_file:
-        image = Image.open(uploaded_file)
-        st.image(image, caption="업로드된 사진", use_container_width=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+st.markdown("---")
 
-    # 키워드 선택
-    st.markdown('<div class="keyword-section">', unsafe_allow_html=True)
-    st.subheader("🎨 한복 스타일 선택")
+# 추가 요청사항
+st.subheader("✍️ 추가 요청사항 (선택)")
+custom_prompt = st.text_area(
+    "원하는 추가 스타일이나 요청사항을 입력하세요",
+    placeholder="예: 벚꽃 배경, 달빛 아래, 궁궐 앞 등",
+    height=100
+)
 
-    selected_keywords = {}
-
-    for category, options in keyword_options.items():
-        st.markdown(f"**{category}**")
-        selected_keywords[category] = st.selectbox(
-            f"선택_{category}",
-            options=list(options.keys()),
-            label_visibility="collapsed",
-            key=category
-        )
-
-    st.markdown('</div>', unsafe_allow_html=True)
-
-    # 추가 커스텀 프롬프트
-    st.markdown('<div class="keyword-section">', unsafe_allow_html=True)
-    st.subheader("✍️ 추가 요청사항 (선택)")
-    custom_prompt = st.text_area(
-        "원하는 추가 스타일이나 요청사항을 입력하세요",
-        placeholder="예: 벚꽃 배경, 달빛 아래, 궁궐 앞 등",
-        height=100
-    )
-    st.markdown('</div>', unsafe_allow_html=True)
-
-with col2:
-    st.markdown('<div class="keyword-section">', unsafe_allow_html=True)
-    st.subheader("🎨 생성될 이미지 미리보기")
-
-    # 선택된 키워드 요약
-    st.markdown("**선택한 스타일:**")
-    for category, selected in selected_keywords.items():
-        st.markdown(f"- **{category}:** {selected}")
-
-    if custom_prompt:
-        st.markdown(f"- **추가 요청:** {custom_prompt}")
-
-    st.markdown('</div>', unsafe_allow_html=True)
-
-    if st.button("🎨 한복 입히기!", type="primary", use_container_width=True):
+# 생성 버튼
+if st.button("🎨 한복 입히기!", type="primary", use_container_width=True):
+    if not uploaded_file:
+        st.warning("⚠️ 반려동물 사진을 먼저 업로드해주세요!")
+    else:
         with st.spinner("✨ 한복을 입히는 중입니다..."):
             try:
                 client = OpenAI(api_key=api_key)
@@ -172,7 +171,6 @@ with col2:
     Keep the image photographic and natural.
     Do not change the background.
     Keep original lighting and shadows.
-    
 
     Hanbok style: {gender}, {hanbok_style}
     Color: {color_scheme}
@@ -206,7 +204,6 @@ with col2:
 st.markdown("---")
 st.markdown("""
 <div style='text-align: center; color: #888;'>
-    <p>🎨 OpenAI DALL-E-3를 활용한 반려동물 한복 생성기</p>
-    <p>Made with ❤️ using Streamlit</p>
+    <p>🎨 반려동물 한복 입히기 </p>
 </div>
 """, unsafe_allow_html=True)
