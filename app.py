@@ -96,7 +96,7 @@ keyword_options = {
         "무관 ⚔️": "Korean military officer hanbok with armor-inspired details",
         "돌쇠 🪵": "traditional Korean servant (dolssoe) hanbok with simple cotton fabric, rolled sleeves, waist belt, straw shoes, and rustic countryside vibe"
     },
-    "색상 선택 (여러 색상 조합 가능)": {
+    "색상 선택": {
     "흰색 🤍": "white",
     "금색 ✨": "gold",
     "하늘색 ☁️": "sky blue",
@@ -121,9 +121,9 @@ with left_col:
     selected_keywords = {}
 
     for category, options in keyword_options.items():
-        if category == "색상 선택 (여러 색상 조합 가능)":
+        if category == "색상 선택":
             selected_keywords[category] = st.multiselect(
-                category,
+                "한복 색상 (색상 조합 가능)",
                 options=list(options.keys()),
                 key=category
             )
