@@ -152,23 +152,36 @@ with left_col:
                         color_scheme = keyword_options["색상 조합"][selected_keywords["색상 조합"]]
 
                         prompt = f"""
-    Edit this image.
+    Carefully edit this photo.
 
-    STRICT RULES:
-    Add a realistic traditional Korean hanbok outfit to this pet.
-    Preserve the original face, fur texture, lighting, and photo realism.
-    Do not redraw the face.
-    Only modify the clothing area.
-    Keep the image photographic and natural.
-    Do not change the background.
-    Keep original lighting and shadows.
-
-    Hanbok style: {gender}, {hanbok_style}
+    This is a clothing overlay task.
+    
+    CRITICAL INSTRUCTIONS:
+    - Keep the exact same pose, body position, camera angle, framing, and proportions.
+    - Do NOT change the face in any way.
+    - Do NOT change the eyes, nose, mouth, fur texture, or expression.
+    - Do NOT change the background.
+    - Do NOT change lighting or shadows.
+    - Do NOT alter the pet's anatomy or body shape.
+    - Only add clothing on top of the existing body.
+    - Think of it as dressing the pet, not redrawing it.
+    
+    Edit area restriction:
+    Modify pixels ONLY where the hanbok fabric would naturally exist.
+    All other pixels must remain identical to the original image.
+    
+    Add a realistic traditional Korean hanbok:
+    Style: {gender}, {hanbok_style}
     Color: {color_scheme}
     Accessories: match with {hanbok_style}
     Atmosphere: cute and lovely
 
+
     {custom_prompt if custom_prompt else ""}
+    
+    The final result must look like the original photo, 
+    with the pet naturally wearing a hanbok.
+    The output must look like the original image with clothes composited onto it, not a newly generated image.
     """
 
                         # 업로드 이미지를 바이트로 변환
