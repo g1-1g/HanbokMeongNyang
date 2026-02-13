@@ -44,30 +44,11 @@ st.markdown('<p class="sub-title">AI가 당신의 반려동물에게 멋진 한�
 # 시크릿 키에서 API 키 로드
 api_key = st.secrets["API_KEY"]
 
-# 사이드바
-with st.sidebar:
-    st.header("⚙️ 설정")
-    st.markdown("### 📖 사용 방법")
-    st.markdown("""
-    1. 반려동물 사진 업로드
-    2. 원하는 한복 스타일 선택
-    3. '한복 입히기' 버튼 클릭
-    4. 생성된 이미지 다운로드
-    """)
-
 # 키워드 옵션 정의
 keyword_options = {
     "동물 종류": {
         "강아지 🐕": "cute puppy dog",
         "고양이 🐱": "cute cat",
-        "포메라니안": "Pomeranian dog",
-        "치와와": "Chihuahua dog",
-        "웰시코기": "Welsh Corgi dog",
-        "진돗개": "Jindo dog",
-        "페르시안 고양이": "Persian cat",
-        "스코티시폴드": "Scottish Fold cat",
-        "러시안블루": "Russian Blue cat",
-        "샴 고양이": "Siamese cat"
     },
     "성별": {
         "남자 한복 (남아)": "male",
@@ -93,17 +74,17 @@ keyword_options = {
         "하늘+연분홍 ☁️🌸": "sky blue and light pink soft colors"
     },
     "장신구": {
+        "장신구 없음": "no accessories, simple and clean",
         "화려한 금관 👑": "elaborate golden crown with jewels",
         "전통 갓 🎩": "traditional Korean gat hat",
         "댕기/비녀 💎": "traditional Korean hair ribbon daenggi or binyeo hairpin",
         "노리개 🎀": "traditional Korean norigae ornamental tassel",
         "꽃 장식 🌺": "flower decorations in hair",
-        "장신구 없음": "no accessories, simple and clean"
     },
     "분위기": {
+        "귀엽고 사랑스러움 🥰": "cute and adorable atmosphere",
         "위엄있고 당당함 🦁": "dignified and majestic atmosphere",
         "우아하고 품위있음 🦢": "elegant and graceful atmosphere",
-        "귀엽고 사랑스러움 🥰": "cute and adorable atmosphere",
         "화려하고 눈부심 ✨": "gorgeous and dazzling atmosphere",
         "단아하고 차분함 🌿": "refined and calm atmosphere",
         "발랄하고 생기있음 🌈": "lively and vibrant atmosphere"
@@ -168,14 +149,11 @@ with col2:
 
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # 이미지 생성 버튼
     if st.button("🎨 한복 입히기!", type="primary", use_container_width=True):
-        with st.spinner("✨ AI가 한복을 입히는 중입니다... 잠시만 기다려주세요!"):
+        with st.spinner("✨ 한복을 입히는 중입니다..."):
             try:
-                # OpenAI 클라이언트 초기화
                 client = OpenAI(api_key=api_key)
 
-                # 프롬프트 구성
                 animal_type = keyword_options["동물 종류"][selected_keywords["동물 종류"]]
                 gender = keyword_options["성별"][selected_keywords["성별"]]
                 hanbok_style = keyword_options["한복 스타일"][selected_keywords["한복 스타일"]]
@@ -183,58 +161,46 @@ with col2:
                 accessories = keyword_options["장신구"][selected_keywords["장신구"]]
                 atmosphere = keyword_options["분위기"][selected_keywords["분위기"]]
 
-                # 최종 프롬프트 (원본 유지 + 한복만 입히기)
-                prompt = f"""A realistic phGoogle Imagen 3oto of a {animal_type} wearing a traditional Korean hanbok.
-Do NOT change the pet's face, body shape, or pose. Only add hanbok clothing naturally onto the pet.
-Keep the background simple and plain. Do not add any fantasy or dramatic elements.
+                prompt = f"""
+    Edit this image.
 
-Hanbok: {gender} style, {hanbok_style}
-Colors: {color_scheme}
-Accessories: {accessories}
+    STRICT RULES:
+    Add a realistic traditional Korean hanbok outfit to this pet.
+    Preserve the original face, fur texture, lighting, and photo realism.
+    Do not redraw the face.
+    Only modify the clothing area.
+    Keep the image photographic and natural.
+    Do not change the background.
+    Keep original lighting and shadows.
+    
 
-{f'Additional request: {custom_prompt}' if custom_prompt else ''}
+    Hanbok style: {gender}, {hanbok_style}
+    Color: {color_scheme}
+    Accessories: {accessories}
+    Atmosphere: {atmosphere}
 
-The result should look like a natural photo of the pet simply dressed in hanbok, not an artistic illustration."""
+    {custom_prompt if custom_prompt else ""}
+    """
 
-                # DALL-E-3로 이미지 생성
-                response = client.images.generate(
-                    model="dall-e-3",
+                # 업로드 이미지를 바이트로 변환
+                buffered = BytesIO()
+                image.convert("RGB").save(buffered, format="PNG")
+                buffered.seek(0)
+
+                response = client.images.edit(
+                    model="gpt-image-1-mini",
+                    image=("pet.png", buffered, "image/png"),
                     prompt=prompt,
-                    size="1024x1024",
-                    quality="hd",
-                    n=1,
                 )
 
-                image_url = response.data[0].url
+                image_base64 = response.data[0].b64_json
+                generated_image = Image.open(BytesIO(base64.b64decode(image_base64)))
 
-                # 이미지 다운로드
-                image_response = requests.get(image_url)
-                generated_image = Image.open(BytesIO(image_response.content))
-
-                # 결과 표시
                 st.success("✅ 한복 입히기 완료!")
-                st.image(generated_image, caption="생성된 이미지", use_container_width=True)
-
-                # 이미지 다운로드 버튼
-                buf = BytesIO()
-                generated_image.save(buf, format="PNG")
-                byte_im = buf.getvalue()
-
-                st.download_button(
-                    label="📥 이미지 다운로드",
-                    data=byte_im,
-                    file_name="hanbok_pet.png",
-                    mime="image/png",
-                    use_container_width=True
-                )
-
-                # 생성에 사용된 프롬프트 표시 (접기)
-                with st.expander("🔍 생성에 사용된 상세 프롬프트 보기"):
-                    st.code(prompt, language="text")
+                st.image(generated_image, use_container_width=True)
 
             except Exception as e:
-                st.error(f"❌ 이미지 생성 중 오류가 발생했습니다: {str(e)}")
-                st.info("API 키가 올바른지, 그리고 충분한 크레딧이 있는지 확인해주세요.")
+                st.error(f"❌ 오류 발생: {str(e)}")
 
 # 푸터
 st.markdown("---")
